@@ -45,7 +45,12 @@ export class AppComponent {
 
 		// Create source.
 		const source = Marzipano.ImageUrlSource.fromString(
-			this.panoramas[0].image
+			"//www.marzipano.net/media/equirect/angra.jpg"
+		);
+
+		// Create source.
+		const source2 = Marzipano.ImageUrlSource.fromString(
+			"https://dl.dropboxusercontent.com/s/eflud4o09uxxnhi/pano3.jpg"
 		);
 
 		// Create geometry.
@@ -53,7 +58,7 @@ export class AppComponent {
 
 		// Create view.
 		const limiter = Marzipano.RectilinearView.limit.traditional(1024, 100*Math.PI/180);
-		const view = new Marzipano.RectilinearView({ yaw: Math.PI }, limiter);
+		const view = new Marzipano.RectilinearView({ yaw: Math.PI/2 }, limiter);
 
 		// Create scene.
 		const scene = viewer.createScene({
@@ -63,8 +68,25 @@ export class AppComponent {
 			pinFirstLevel: true
 		});
 
-		// Display scene.
+		const scene2 = viewer.createScene({
+			source: source2,
+			geometry: geometry,
+			view: view,
+			pinFirstLevel: true
+		});
+
 		scene.switchTo();
+
+		setTimeout(() => {
+			// Display scene.
+			scene2.switchTo({
+				transitionDuration: 5000,
+				transitionUpdate: function(val: any, newScene: any) {
+					newScene.layer().setEffects({ opacity: val });
+					scene.layer().setEffects({ opacity: 1-val, textureCrop: { width: 1-val/15, height: 1-val/15}});
+				}
+			});
+		}, 5000)
 	}
 
 	/**
