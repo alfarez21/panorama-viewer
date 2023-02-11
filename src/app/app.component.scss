@@ -28,3 +28,34 @@
         background-color: #CBC7D3;
     }
 }
+
+.hotspot {
+    &__icon {
+        width: 45px;
+        height: 45px;
+        position: relative;
+        background-color: rgb(38, 38, 38);
+        border-radius: 50%;
+
+        img {
+            width: 25px;
+            height: 25px;
+            position: absolute;
+            top: 46%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            &:hover {
+                background-color: rgb(85, 85, 85);
+            }
+        }
+    }
+
+    &__content {
+        margin-top: 10px;
+        border-radius: 5px;
+        background-color: rgb(235, 235, 235);
+        padding: 5px 20px;
+        width: 300px;
+    }
+}
