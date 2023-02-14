@@ -3,6 +3,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 
 // Third-party NPM
 import SwiperCore, { FreeMode, Navigation, Thumbs } from "swiper";
+import easing from './shared/easing';
 
 // Third-party CDN
 declare const Marzipano: any;
@@ -52,7 +53,7 @@ export class AppComponent {
 		
 		// Create view.
 		this.limiter = Marzipano.RectilinearView.limit.traditional(1024, 100*Math.PI/180);
-		this.view = new Marzipano.RectilinearView({ yaw: Math.PI/2 }, this.limiter);
+		this.view = new Marzipano.RectilinearView({ yaw: Math.PI, fov: 2 }, this.limiter);
 	}
 
 	/**
@@ -131,14 +132,53 @@ export class AppComponent {
 	 * Todo: to change current panorama to next panorama
 	 * @param id : number
 	 */
-	changePano(id: number) {
+	changePano(id: number): void {
 		const nextPano: Panorama | undefined  = this.panoramas.find((panorama: Panorama) => { 
 			return panorama.id === id
 		});
 
 		if (nextPano) {
-			nextPano.scene.switchTo({});
+			nextPano?.scene.switchTo({
+				transitionDuration: 2000,
+				transitionUpdate: (val: number, newScene: any, oldScene: any) => {
+					val = easing.easeInOutQuad(val);
+					const rectOld = this.calcZoomingPano({ point: { x: 0, y: 0}, level: val})
+					oldScene.layer().setEffects({ opacity: 1-val, rect: rectOld });
+					const rectNew = this.calcZoomingPano({ point: { x: 0, y: 0}, level: val / 2})
+					newScene.layer().setEffects({ opacity: val, rect: rectNew });
+				}
+			});
 			this.currentPano = nextPano;
 		}
 	}
+
+	/**
+	 * * ZOOMING PANO *
+	 * Todo: to zooming pano
+	 * @param opts {
+	 * 	point: { x: number, y: number }, -> focus point
+	 *	level: number -> zooming level
+	 * 	scene: BABYLON.Scene
+	 * } 
+	 */
+	calcZoomingPano(
+		opts: {
+			point: { x: number, y: number },
+			level: number,
+		}
+	) : { 
+		relativeWidth: number, 
+		relativeX: number
+	} {
+		const { level } = opts;
+		const relativeWidth = 1 + level;
+		const relativeX = level * -1;
+		const rect = {
+			relativeWidth: relativeWidth < 1 ? 1 : relativeWidth,
+			relativeX: relativeX > 0 ? 0 : relativeX,
+		};
+		console.log(rect)
+		return rect;
+	}
+
 }
